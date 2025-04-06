@@ -1,6 +1,7 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Product } from "@/types";
+import { Settings, defaultSettings } from "@/types/settings";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -20,32 +21,37 @@ interface ProductFormProps {
   initialData?: Product;
 }
 
-const categories = [
-  "طعام",
-  "مشروبات",
-  "إلكترونيات",
-  "منظفات",
-  "ملابس",
-  "أدوات منزلية",
-  "أخرى",
-];
-
 const ProductForm: React.FC<ProductFormProps> = ({
   open,
   onClose,
   onSubmit,
   initialData,
 }) => {
+  // الحصول على الفئات من الإعدادات
+  const savedSettings = localStorage.getItem("settings");
+  const settings: Settings = savedSettings 
+    ? JSON.parse(savedSettings)
+    : defaultSettings;
+  
+  const categories = settings.categories.map(cat => cat.name);
+  
   const [formData, setFormData] = useState<Omit<Product, "id" | "createdAt" | "updatedAt">>({
     name: initialData?.name || "",
     price: initialData?.price || 0,
     stock: initialData?.stock || 0,
-    category: initialData?.category || "أخرى",
+    category: initialData?.category || (categories.length > 0 ? categories[0] : "أخرى"),
     barcode: initialData?.barcode || "",
     cost: initialData?.cost || 0,
   });
   
   const [errors, setErrors] = useState<Record<string, string>>({});
+  
+  // تحديث الفئات عند تغيير الإعدادات
+  useEffect(() => {
+    if (categories.length > 0 && !formData.category) {
+      setFormData(prev => ({ ...prev, category: categories[0] }));
+    }
+  }, [categories]);
   
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>

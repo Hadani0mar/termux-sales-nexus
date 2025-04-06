@@ -132,7 +132,7 @@
 
 /* Color spots */
 .color-spot {
-  @apply absolute rounded-full opacity-20 blur-3xl;
+  @apply absolute rounded-full blur-3xl;
   z-index: -1;
 }
 
@@ -197,15 +197,27 @@
 }
 
 .landing-title {
-  @apply text-4xl md:text-6xl font-bold mb-6 animate-fade-in;
+  @apply text-4xl md:text-6xl font-bold mb-6 animate-fade-in dark:text-white;
 }
 
 .landing-subtitle {
-  @apply text-xl md:text-2xl mb-8 opacity-80 animate-fade-in;
+  @apply text-xl md:text-2xl mb-8 opacity-80 animate-fade-in dark:text-gray-300;
   animation-delay: 200ms;
 }
 
 .landing-cta {
   @apply px-8 py-3 rounded-full bg-primary text-primary-foreground font-medium text-lg shadow-lg hover:shadow-xl transition-all animate-fade-in;
   animation-delay: 400ms;
+}
+
+/* Screen size for small mobile */
+@layer utilities {
+  @variants responsive {
+    .xs\:block {
+      display: block;
+    }
+    .xs\:hidden {
+      display: none;
+    }
+  }
 }

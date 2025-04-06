@@ -2,6 +2,18 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
+import { 
+  ShoppingBag, 
+  Package, 
+  BarChart, 
+  Settings, 
+  CreditCard, 
+  FileText, 
+  Moon, 
+  Sun, 
+  RefreshCw, 
+  Clock
+} from "lucide-react";
 
 interface LandingProps {
   onComplete: () => void;
@@ -38,12 +50,24 @@ const Landing: React.FC<LandingProps> = ({ onComplete }) => {
   useEffect(() => {
     if (progress >= 100) {
       const timeout = setTimeout(() => {
-        onComplete();
+        // Don't automatically complete to give user time to read features
       }, 1500);
       
       return () => clearTimeout(timeout);
     }
   }, [progress, onComplete]);
+
+  // Features list
+  const features = [
+    { icon: <ShoppingBag />, title: "نقطة البيع", description: "إدارة المبيعات بطريقة سهلة" },
+    { icon: <Package />, title: "إدارة المخزون", description: "تتبع المنتجات والكميات" },
+    { icon: <BarChart />, title: "التقارير والإحصائيات", description: "تحليل الأداء والمبيعات" },
+    { icon: <CreditCard />, title: "نظام الديون", description: "تسجيل وإدارة المبيعات بالدين" },
+    { icon: <FileText />, title: "الفواتير", description: "إنشاء وطباعة فواتير احترافية" },
+    { icon: <Moon />, title: "الوضع الليلي", description: "وضع مريح للعين في الإضاءة المنخفضة" },
+    { icon: <RefreshCw />, title: "النسخ الاحتياطي", description: "حفظ واسترجاع بيانات النظام" },
+    { icon: <Clock />, title: "جرد نهاية الدوام", description: "محاسبة وتتبع المبيعات اليومية" },
+  ];
   
   return (
     <div className={`landing-container ${theme}`}>
@@ -51,12 +75,12 @@ const Landing: React.FC<LandingProps> = ({ onComplete }) => {
       {colorSpots.map((spot, index) => (
         <div
           key={index}
-          className={`color-spot ${spot.color} ${spot.size} ${spot.top} ${spot.left || ''} ${spot.right || ''} ${spot.bottom || ''}`}
+          className={`color-spot ${spot.color} ${theme === 'dark' ? 'opacity-10' : 'opacity-20'} ${spot.size} ${spot.top} ${spot.left || ''} ${spot.right || ''} ${spot.bottom || ''}`}
         />
       ))}
       
-      <div className="landing-content glass p-10 rounded-2xl">
-        <h1 className="landing-title">نظام المبيعات</h1>
+      <div className="landing-content glass p-8 md:p-10 rounded-2xl max-w-4xl w-full">
+        <h1 className="landing-title">نظام نورا للمنظفات</h1>
         <p className="landing-subtitle">حل متكامل لإدارة نقاط البيع والمخزون والمبيعات</p>
         
         {/* شريط التقدم */}
@@ -67,18 +91,43 @@ const Landing: React.FC<LandingProps> = ({ onComplete }) => {
           ></div>
         </div>
         
-        <div className="animate-fade-in" style={{ animationDelay: "600ms" }}>
-          {progress < 100 ? (
-            <p>جاري التحميل... {progress}%</p>
-          ) : (
+        {progress >= 100 && (
+          <>
+            <div className="mt-8 mb-12">
+              <h2 className="text-xl font-semibold mb-6 dark:text-white">مميزات النظام</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {features.map((feature, index) => (
+                  <div 
+                    key={index} 
+                    className="bg-white/50 dark:bg-gray-800/50 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700 animate-fade-in"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <div className="flex items-center gap-3 mb-2">
+                      <div className="p-2 bg-primary/10 rounded-full text-primary">
+                        {feature.icon}
+                      </div>
+                      <h3 className="font-semibold dark:text-white">{feature.title}</h3>
+                    </div>
+                    <p className="text-sm text-gray-600 dark:text-gray-300">{feature.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
             <Button
               className="landing-cta"
               onClick={onComplete}
             >
               انتقل إلى التطبيق
             </Button>
-          )}
-        </div>
+          </>
+        )}
+        
+        {progress < 100 && (
+          <div className="animate-fade-in" style={{ animationDelay: "600ms" }}>
+            <p className="dark:text-white">جاري التحميل... {progress}%</p>
+          </div>
+        )}
       </div>
     </div>
   );

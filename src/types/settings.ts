@@ -6,6 +6,7 @@ export interface Settings {
   location: string;
   shouldApplyTax: boolean;
   authorizedDebtors: Array<{ name: string; phone?: string; limit?: number; notes?: string }>;
+  categories: Array<{ id: string; name: string; color?: string }>;
 }
 
 export const defaultSettings: Settings = {
@@ -14,5 +15,11 @@ export const defaultSettings: Settings = {
   theme: 'light',
   location: "سبها",
   shouldApplyTax: false,
-  authorizedDebtors: []
+  authorizedDebtors: [],
+  categories: [
+    { id: "cat1", name: "منظفات" },
+    { id: "cat2", name: "معطرات" },
+    { id: "cat3", name: "مستلزمات منزلية" },
+    { id: "cat4", name: "أخرى" }
+  ]
 };

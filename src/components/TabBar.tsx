@@ -21,7 +21,7 @@ const TabBar = () => {
   ];
   
   return (
-    <div className={`bottom-tab-bar glass ${theme}`}>
+    <div className={`bottom-tab-bar glass ${theme} z-50`}>
       {tabs.map((tab) => (
         <Link
           key={tab.path}
@@ -33,7 +33,7 @@ const TabBar = () => {
           }`}
         >
           {tab.icon}
-          <span className="text-xs mt-1">{tab.label}</span>
+          <span className="text-xs mt-1 hidden xs:block">{tab.label}</span>
         </Link>
       ))}
     </div>

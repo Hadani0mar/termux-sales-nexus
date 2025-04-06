@@ -21,20 +21,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   
   return (
     <div className={`flex h-screen bg-background rtl overflow-hidden ${theme}`}>
-      {/* بقع الألوان */}
+      {/* بقع الألوان مع وضوح مختلف في الوضع الداكن */}
       {colorSpots.map((spot, index) => (
         <div
           key={index}
-          className={`color-spot ${spot.color} ${spot.size} ${spot.top} ${spot.left || ''} ${spot.right || ''} ${spot.bottom || ''}`}
+          className={`color-spot ${spot.color} ${theme === 'dark' ? 'opacity-10' : 'opacity-20'} ${spot.size} ${spot.top} ${spot.left || ''} ${spot.right || ''} ${spot.bottom || ''}`}
         />
       ))}
       
       {/* المحتوى الرئيسي */}
       <div className="flex-1 flex flex-col overflow-hidden relative z-10">
         {/* رأس الصفحة */}
-        <header className="glass py-4 px-6 border-b">
+        <header className="glass py-4 px-6 border-b dark:border-gray-700">
           <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold">
+            <h1 className="text-xl font-semibold dark:text-white">
               {location.pathname === "/" ? "نقطة البيع" : 
                location.pathname === "/inventory" ? "المخزون" :
                location.pathname === "/sales" ? "المبيعات" :

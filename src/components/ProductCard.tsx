@@ -16,16 +16,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onAddToCart }) => {
   };
   
   return (
-    <div className="bg-white rounded-lg shadow overflow-hidden">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden border border-gray-100 dark:border-gray-700 transition-all hover:shadow-md">
       <div className="p-4">
-        <h3 className="font-semibold text-gray-800 truncate">
+        <h3 className="font-semibold text-gray-800 dark:text-gray-200 truncate">
           {product.name}
         </h3>
         <div className="flex items-center justify-between mt-2">
           <span className="font-bold text-primary">
             {formatCurrency(product.price)}
           </span>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             المخزون: {product.stock}
           </span>
         </div>

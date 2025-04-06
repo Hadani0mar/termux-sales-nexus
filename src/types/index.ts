@@ -31,6 +31,7 @@ export interface Sale {
   discountReason?: string;
   isDebt?: boolean;
   debtorName?: string;
+  isFrozen?: boolean; // New field to track frozen debt status
   createdAt: Date;
 }
 
@@ -38,4 +39,10 @@ export interface AppState {
   products: Product[];
   cart: CartItem[];
   sales: Sale[];
+}
+
+export interface Category {
+  id: string;
+  name: string;
+  color?: string;
 }
