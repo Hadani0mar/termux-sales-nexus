@@ -7,6 +7,8 @@ export interface Settings {
   shouldApplyTax: boolean;
   authorizedDebtors: Array<{ name: string; phone?: string; limit?: number; notes?: string }>;
   categories: Array<{ id: string; name: string; color?: string }>;
+  printDiscountReasons: boolean;
+  printNotes: boolean;
 }
 
 export const defaultSettings: Settings = {
@@ -21,5 +23,7 @@ export const defaultSettings: Settings = {
     { id: "cat2", name: "معطرات" },
     { id: "cat3", name: "مستلزمات منزلية" },
     { id: "cat4", name: "أخرى" }
-  ]
+  ],
+  printDiscountReasons: false,
+  printNotes: false
 };

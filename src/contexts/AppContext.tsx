@@ -21,7 +21,8 @@ type AppAction =
   | { type: "UPDATE_CART_ITEM"; payload: { productId: string; quantity: number } }
   | { type: "REMOVE_FROM_CART"; payload: string }
   | { type: "CLEAR_CART" }
-  | { type: "ADD_SALE"; payload: Sale };
+  | { type: "ADD_SALE"; payload: Sale }
+  | { type: "UPDATE_SALE"; payload: Sale };
 
 // مختزل سياق التطبيق
 const appReducer = (state: AppState, action: AppAction): AppState => {
@@ -116,6 +117,15 @@ const appReducer = (state: AppState, action: AppAction): AppState => {
       };
     }
     
+    case "UPDATE_SALE": {
+      return {
+        ...state,
+        sales: state.sales.map((sale) =>
+          sale.id === action.payload.id ? action.payload : sale
+        ),
+      };
+    }
+    
     default:
       return state;
   }
@@ -132,6 +142,7 @@ interface AppContextType {
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
   addSale: (saleData: Omit<Sale, "id" | "createdAt">) => void;
+  updateSale: (sale: Sale) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -311,6 +322,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     toast.success("تم تسجيل عملية البيع بنجاح");
   };
   
+  // تحديث عملية بيع
+  const updateSale = (sale: Sale) => {
+    dispatch({ type: "UPDATE_SALE", payload: sale });
+    toast.success("تم تحديث عملية البيع بنجاح");
+  };
+  
   return (
     <AppContext.Provider
       value={{
@@ -323,6 +340,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         removeFromCart,
         clearCart,
         addSale,
+        updateSale,
       }}
     >
       {children}

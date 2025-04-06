@@ -31,7 +31,7 @@ export interface Sale {
   discountReason?: string;
   isDebt?: boolean;
   debtorName?: string;
-  isFrozen?: boolean; // New field to track frozen debt status
+  isFrozen?: boolean; // Track frozen debt status
   createdAt: Date;
 }
 
@@ -45,4 +45,28 @@ export interface Category {
   id: string;
   name: string;
   color?: string;
+}
+
+// New interface for shift reports
+export interface ShiftReport {
+  id: string;
+  date: Date;
+  salesCount: number;
+  totalSales: number;
+  totalCashSales: number;
+  totalCardSales: number;
+  totalDebtSales: number;
+  cashInDrawer: number;
+  cashShortage: number;
+  notes?: string;
+  includeDebtInTotal: boolean;
+}
+
+// New interface for debtor
+export interface Debtor {
+  name: string;
+  phone?: string;
+  limit: number;
+  notes?: string;
+  currentDebt: number;
 }

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
 import { useAppContext } from "@/contexts/AppContext";
-import { calculateShiftSummary, getTodaySales, formatCurrency } from "@/utils/helpers";
+import { calculateShiftSummary, getTodaySales, formatCurrency, generateId } from "@/utils/helpers";
 import { 
   Card, 
   CardContent, 
@@ -13,8 +13,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { Printer } from "lucide-react";
+import { ShiftReport } from "@/types";
 
 const ShiftEnd = () => {
   const { state } = useAppContext();
@@ -23,6 +27,8 @@ const ShiftEnd = () => {
   const [cashInDrawer, setCashInDrawer] = useState<number>(0);
   const [cashShortage, setCashShortage] = useState<number | null>(null);
   const [completedCheck, setCompletedCheck] = useState<boolean>(false);
+  const [notes, setNotes] = useState<string>("");
+  const [includeDebtInTotal, setIncludeDebtInTotal] = useState<boolean>(false);
   
   // Get today's sales
   const todaySales = getTodaySales(state.sales);
@@ -50,15 +56,20 @@ const ShiftEnd = () => {
     // Store the shift summary in localStorage
     const existingShiftReports = JSON.parse(localStorage.getItem("shiftReports") || "[]");
     
-    const shiftReport = {
-      date: new Date().toISOString(),
+    const shiftReport: ShiftReport = {
+      id: generateId(),
+      date: new Date(),
       salesCount: shiftSummary.salesCount,
-      totalSales: shiftSummary.totalSales,
+      totalSales: includeDebtInTotal 
+        ? shiftSummary.totalSales 
+        : shiftSummary.totalSales - shiftSummary.totalDebtSales,
       totalCashSales: shiftSummary.totalCashSales,
       totalCardSales: shiftSummary.totalCardSales,
       totalDebtSales: shiftSummary.totalDebtSales,
       cashInDrawer: cashInDrawer,
-      cashShortage: cashShortage
+      cashShortage: cashShortage || 0,
+      notes: notes,
+      includeDebtInTotal: includeDebtInTotal
     };
     
     existingShiftReports.unshift(shiftReport);
@@ -66,6 +77,24 @@ const ShiftEnd = () => {
     
     setCompletedCheck(true);
     toast.success("تم حفظ تقرير نهاية الدوام بنجاح");
+  };
+  
+  // Print report
+  const handlePrintReport = () => {
+    const reportContent = document.getElementById('shiftReport');
+    if (reportContent) {
+      const printWindow = window.open('', '', 'height=600,width=800');
+      printWindow?.document.write('<html><head><title>تقرير نهاية الدوام</title>');
+      printWindow?.document.write('<style>body{font-family:Arial;direction:rtl;padding:20px;}h1{text-align:center;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ddd;padding:8px;text-align:right;}th{background-color:#f2f2f2;}</style>');
+      printWindow?.document.write('</head><body>');
+      printWindow?.document.write('<h1>تقرير نهاية الدوام</h1>');
+      printWindow?.document.write('<p>التاريخ: ' + new Date().toLocaleDateString('ar-LY') + '</p>');
+      printWindow?.document.write(reportContent.innerHTML);
+      printWindow?.document.write('</body></html>');
+      printWindow?.document.close();
+      printWindow?.focus();
+      printWindow?.print();
+    }
   };
   
   return (
@@ -76,7 +105,7 @@ const ShiftEnd = () => {
           <p className="text-muted-foreground">مراجعة المبيعات والمخزون وإغلاق الدوام</p>
         </div>
         
-        <div className="grid gap-6 md:grid-cols-2">
+        <div id="shiftReport" className="grid gap-6 md:grid-cols-2">
           <Card>
             <CardHeader>
               <CardTitle>ملخص المبيعات</CardTitle>
@@ -86,7 +115,9 @@ const ShiftEnd = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
                   <p className="text-sm font-medium">إجمالي المبيعات</p>
-                  <p className="text-2xl font-bold text-primary">{formatCurrency(shiftSummary.totalSales)}</p>
+                  <p className="text-2xl font-bold text-primary">
+                    {formatCurrency(includeDebtInTotal ? shiftSummary.totalSales : shiftSummary.totalSales - shiftSummary.totalDebtSales)}
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-medium">عدد المبيعات</p>
@@ -106,6 +137,18 @@ const ShiftEnd = () => {
                 <div className="flex justify-between items-center">
                   <span>مبيعات الدين:</span>
                   <span className="font-medium">{formatCurrency(shiftSummary.totalDebtSales)}</span>
+                </div>
+                
+                <div className="mt-4 flex items-center space-x-2 space-x-reverse">
+                  <Switch
+                    id="includeDebt"
+                    checked={includeDebtInTotal}
+                    onCheckedChange={setIncludeDebtInTotal}
+                    disabled={completedCheck}
+                  />
+                  <Label htmlFor="includeDebt" className="cursor-pointer">
+                    تضمين الديون في إجمالي المبيعات
+                  </Label>
                 </div>
               </div>
             </CardContent>
@@ -150,6 +193,19 @@ const ShiftEnd = () => {
                 </div>
               )}
               
+              <div className="space-y-2">
+                <Label htmlFor="notes">ملاحظات</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="أضف ملاحظات حول التقرير"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  disabled={completedCheck}
+                  className="resize-none"
+                  rows={3}
+                />
+              </div>
+              
               <Button 
                 onClick={handleCompleteShift} 
                 className="w-full mt-4"
@@ -159,13 +215,24 @@ const ShiftEnd = () => {
               </Button>
               
               {completedCheck && (
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => navigate("/")}
-                >
-                  العودة للصفحة الرئيسية
-                </Button>
+                <div className="flex gap-2 flex-col">
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={handlePrintReport}
+                  >
+                    <Printer className="ml-2 h-4 w-4" />
+                    طباعة التقرير
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => navigate("/")}
+                  >
+                    العودة للصفحة الرئيسية
+                  </Button>
+                </div>
               )}
             </CardContent>
           </Card>

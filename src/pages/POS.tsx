@@ -4,14 +4,18 @@ import Layout from "@/components/Layout";
 import ProductCard from "@/components/ProductCard";
 import CartItemCard from "@/components/CartItemCard";
 import CheckoutForm from "@/components/CheckoutForm";
+import DebtorManager from "@/components/DebtorManager";
 import { useAppContext } from "@/contexts/AppContext";
-import { formatCurrency, calculateCartTotal, generateReceipt } from "@/utils/helpers";
+import { formatCurrency, calculateCartTotal, generateReceipt, hasReachedDebtLimit } from "@/utils/helpers";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Search, ShoppingCart, ReceiptText, Filter } from "lucide-react";
 import { Settings, defaultSettings } from "@/types/settings";
 import { Badge } from "@/components/ui/badge";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { Search, ShoppingCart, ReceiptText, Users } from "lucide-react";
+import { toast } from "sonner";
+import { Sale } from "@/types";
 
 const POS = () => {
   const { 
@@ -20,12 +24,19 @@ const POS = () => {
     updateCartItem, 
     removeFromCart, 
     clearCart, 
-    addSale 
+    addSale, 
+    updateSale 
   } = useAppContext();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [debtorManagerOpen, setDebtorManagerOpen] = useState(false);
+  const [debtLimitAlert, setDebtLimitAlert] = useState<{ open: boolean, debtorName: string, limit: number }>({
+    open: false,
+    debtorName: "",
+    limit: 0
+  });
   
   // Get settings from localStorage
   const savedSettings = localStorage.getItem("settings");
@@ -33,13 +44,13 @@ const POS = () => {
     ? JSON.parse(savedSettings)
     : defaultSettings;
   
-  // البحث وفلترة المنتجات حسب الفئة
+  // Filter products by search and category
   const filteredProducts = state.products.filter((product) => {
     const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       product.barcode?.includes(searchQuery) ||
       product.category.toLowerCase().includes(searchQuery.toLowerCase());
     
-    // إذا كان هناك فئة محددة، قم بتصفية المنتجات وفقًا لها
+    // If a category is selected, filter products by it
     if (selectedCategory) {
       return matchesSearch && product.category === selectedCategory;
     }
@@ -47,35 +58,111 @@ const POS = () => {
     return matchesSearch;
   });
   
-  // حساب إجمالي السلة
+  // Calculate cart total
   const cartTotal = calculateCartTotal(state.cart);
   const itemCount = state.cart.reduce((count, item) => count + item.quantity, 0);
   
-  // إضافة منتج إلى السلة مع الكمية الافتراضية 1
+  // Add product to cart with default quantity 1
   const handleAddToCart = (product: any) => {
     addToCart(product, 1);
   };
   
-  // إتمام الطلب وإنشاء فاتورة
+  // Handle checkout and create receipt
   const handleCheckout = (saleData: any) => {
-    // إضافة البيع إلى قاعدة البيانات
+    // Handle debt limit check
+    if (saleData.isDebt && saleData.debtorName) {
+      const authorizedDebtor = settings.authorizedDebtors.find(
+        d => d.name === saleData.debtorName
+      );
+      
+      if (authorizedDebtor?.limit) {
+        const currentDebt = state.sales
+          .filter(s => s.isDebt && !s.isFrozen && s.debtorName === saleData.debtorName)
+          .reduce((total, sale) => total + sale.finalTotal, 0);
+        
+        const newTotalDebt = currentDebt + saleData.finalTotal;
+        
+        if (newTotalDebt > authorizedDebtor.limit) {
+          setDebtLimitAlert({
+            open: true,
+            debtorName: saleData.debtorName,
+            limit: authorizedDebtor.limit
+          });
+          return;
+        }
+      }
+    }
+    
+    // Add sale to database
     addSale(saleData);
     
-    // إنشاء وطباعة الفاتورة
+    // Generate and print receipt
     generateReceipt(
       { ...saleData, id: "temp", createdAt: new Date() },
       settings.businessName,
       settings.receiptFooter
     );
     
-    // إغلاق نافذة الدفع
+    // Close checkout form
     setCheckoutOpen(false);
+  };
+  
+  // Handle debt payment
+  const handlePayDebt = (saleId: string, paymentMethod: "cash" | "card") => {
+    const sale = state.sales.find(s => s.id === saleId);
+    
+    if (sale) {
+      const updatedSale: Sale = {
+        ...sale,
+        isDebt: false,
+        paymentMethod: paymentMethod
+      };
+      
+      updateSale(updatedSale);
+      
+      // Generate receipt for payment
+      generateReceipt(
+        updatedSale,
+        settings.businessName,
+        settings.receiptFooter
+      );
+    }
+  };
+  
+  // Handle freeze debt
+  const handleFreezeDebt = (saleId: string, isFrozen: boolean) => {
+    const sale = state.sales.find(s => s.id === saleId);
+    
+    if (sale) {
+      const updatedSale: Sale = {
+        ...sale,
+        isFrozen: isFrozen
+      };
+      
+      updateSale(updatedSale);
+    }
+  };
+  
+  // Override debt limit and proceed with checkout
+  const handleOverrideDebtLimit = (saleData: any) => {
+    addSale(saleData);
+    
+    generateReceipt(
+      { ...saleData, id: "temp", createdAt: new Date() },
+      settings.businessName,
+      settings.receiptFooter
+    );
+    
+    setDebtLimitAlert({ open: false, debtorName: "", limit: 0 });
+    setCheckoutOpen(false);
+    
+    toast.warning("تم تجاوز حد الدين المسموح به للعميل");
   };
   
   return (
     <Layout>
       <div className="layout-container">
-        {/* قسم المنتجات */}
+        {/* Products section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
           <div className="p-4 border-b dark:border-gray-700">
             <div className="relative mb-4">
@@ -88,7 +175,7 @@ const POS = () => {
               />
             </div>
             
-            {/* فلتر الفئات */}
+            {/* Categories filter */}
             <ScrollArea className="whitespace-nowrap pb-2">
               <div className="flex gap-2 rt">
                 <Badge 
@@ -134,9 +221,9 @@ const POS = () => {
           </ScrollArea>
         </div>
         
-        {/* قسم السلة */}
+        {/* Cart section */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm flex flex-col">
-          <div className="p-4 border-b dark:border-gray-700">
+          <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center">
             <h2 className="text-lg font-semibold flex items-center dark:text-white">
               <ShoppingCart className="ml-2" />
               سلة المشتريات
@@ -146,6 +233,15 @@ const POS = () => {
                 </span>
               )}
             </h2>
+            
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setDebtorManagerOpen(true)}
+            >
+              <Users className="ml-2 h-4 w-4" />
+              إدارة الديون
+            </Button>
           </div>
           
           {state.cart.length > 0 ? (
@@ -200,13 +296,52 @@ const POS = () => {
         </div>
       </div>
       
-      {/* نموذج إتمام البيع */}
+      {/* Checkout form */}
       <CheckoutForm
         open={checkoutOpen}
         onClose={() => setCheckoutOpen(false)}
         cartItems={state.cart}
         onCheckout={handleCheckout}
       />
+      
+      {/* Debt manager dialog */}
+      <DebtorManager
+        open={debtorManagerOpen}
+        onClose={() => setDebtorManagerOpen(false)}
+        sales={state.sales}
+        onPayDebt={handlePayDebt}
+        onFreezeDebt={handleFreezeDebt}
+      />
+      
+      {/* Debt limit alert dialog */}
+      <AlertDialog open={debtLimitAlert.open} onOpenChange={(open) => !open && setDebtLimitAlert({ open: false, debtorName: "", limit: 0 })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>تحذير تجاوز حد الدين</AlertDialogTitle>
+            <AlertDialogDescription>
+              العميل {debtLimitAlert.debtorName} سيتجاوز الحد المسموح به للدين ({formatCurrency(debtLimitAlert.limit)}).
+              هل ترغب في المتابعة على الرغم من ذلك؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction 
+              className="bg-red-500 hover:bg-red-600"
+              onClick={() => {
+                // Get the checkout data from the form and proceed
+                const checkoutData = document.getElementById('checkout-form') as HTMLFormElement;
+                if (checkoutData) {
+                  const formData = new FormData(checkoutData);
+                  const saleData = Object.fromEntries(formData);
+                  handleOverrideDebtLimit(saleData);
+                }
+              }}
+            >
+              متابعة على الرغم من تجاوز الحد
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Layout>
   );
 };
