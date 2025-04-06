@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useReducer, useEffect } from "react";
 import { Product, CartItem, Sale, AppState } from "@/types";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { generateId, updateProductStock, hasEnoughStock } from "@/utils/helpers";
 
 // تعريف حالة التطبيق الابتدائية
