@@ -7,11 +7,11 @@ export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 15);
 };
 
-// Format currency for display
+// Format currency for display (now Libyan Dinar)
 export const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat("ar-SA", {
+  return new Intl.NumberFormat("ar-LY", {
     style: "currency",
-    currency: "SAR",
+    currency: "LYD",
   }).format(amount);
 };
 
@@ -35,7 +35,7 @@ export const calculateFinalTotal = (
 
 // Format date for display
 export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat("ar-SA", {
+  return new Intl.DateTimeFormat("ar-LY", {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -45,7 +45,7 @@ export const formatDate = (date: Date): string => {
 };
 
 // Generate a receipt as PDF
-export const generateReceipt = (sale: Sale, businessName: string): void => {
+export const generateReceipt = (sale: Sale, businessName: string, receiptFooter: string = ""): void => {
   const container = document.createElement("div");
   container.className = "receipt-container rtl p-4";
   
@@ -110,7 +110,7 @@ export const generateReceipt = (sale: Sale, businessName: string): void => {
     </div>
     
     <div class="text-center mt-4 text-sm">
-      <p>شكراً لزيارتكم</p>
+      <p>${receiptFooter || 'شكراً لزيارتكم'}</p>
     </div>
   `;
   
@@ -176,4 +176,47 @@ export const updateProductStock = (
     stock: product.stock - quantity,
     updatedAt: new Date(),
   };
+};
+
+// Export JSON data 
+export const exportDataToJson = (data: any): void => {
+  const jsonString = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonString], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `pos_backup_${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+// Import JSON data
+export const importDataFromJson = (file: File): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      try {
+        const result = event.target?.result;
+        if (typeof result === 'string') {
+          const data = JSON.parse(result);
+          resolve(data);
+        } else {
+          reject(new Error('Failed to read file'));
+        }
+      } catch (error) {
+        reject(error);
+      }
+    };
+    
+    reader.onerror = () => {
+      reject(new Error('Error reading file'));
+    };
+    
+    reader.readAsText(file);
+  });
 };
