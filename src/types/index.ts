@@ -28,6 +28,9 @@ export interface Sale {
   customerName?: string;
   customerPhone?: string;
   notes?: string;
+  discountReason?: string;
+  isDebt?: boolean;
+  debtorName?: string;
   createdAt: Date;
 }
 

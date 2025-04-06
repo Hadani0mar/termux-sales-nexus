@@ -28,7 +28,7 @@ const TabBar = () => {
           to={tab.path}
           className={`flex flex-col items-center justify-center p-2 rounded-lg transition-colors ${
             isActive(tab.path)
-              ? "text-primary"
+              ? theme === 'dark' ? "text-primary bg-slate-800/50" : "text-primary bg-primary/10"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >

@@ -1,5 +1,6 @@
 
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { defaultSettings } from "@/types/settings";
 
 type Theme = "light" | "dark";
 

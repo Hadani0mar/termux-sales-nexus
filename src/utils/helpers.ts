@@ -1,13 +1,14 @@
 
 import { Product, CartItem, Sale } from "@/types";
 import html2pdf from "html2pdf.js";
+import { defaultSettings } from "@/types/settings";
 
 // Generate a random ID
 export const generateId = (): string => {
   return Math.random().toString(36).substring(2, 15);
 };
 
-// Format currency for display (now Libyan Dinar)
+// Format currency for display (Libyan Dinar)
 export const formatCurrency = (amount: number): string => {
   return new Intl.NumberFormat("ar-LY", {
     style: "currency",
@@ -29,7 +30,7 @@ export const calculateFinalTotal = (
   discount: number
 ): number => {
   const afterDiscount = total - discount;
-  const afterTax = afterDiscount + (afterDiscount * tax) / 100;
+  const afterTax = tax > 0 ? afterDiscount + (afterDiscount * tax) / 100 : afterDiscount;
   return afterTax;
 };
 
@@ -45,13 +46,24 @@ export const formatDate = (date: Date): string => {
 };
 
 // Generate a receipt as PDF
-export const generateReceipt = (sale: Sale, businessName: string, receiptFooter: string = ""): void => {
+export const generateReceipt = (sale: Sale, businessName?: string, receiptFooter?: string): void => {
+  // Get settings from localStorage or use defaults
+  const settings = (() => {
+    const savedSettings = localStorage.getItem("settings");
+    return savedSettings ? JSON.parse(savedSettings) : defaultSettings;
+  })();
+  
+  const companyName = businessName || settings.businessName;
+  const footer = receiptFooter || settings.receiptFooter;
+  const applyTax = settings.shouldApplyTax;
+  
   const container = document.createElement("div");
   container.className = "receipt-container rtl p-4";
   
   const content = `
     <div class="text-center mb-4">
-      <h2 class="text-xl font-bold">${businessName}</h2>
+      <h2 class="text-xl font-bold">${companyName}</h2>
+      <p class="text-sm">${settings.location || ""}</p>
       <p class="text-sm">${formatDate(sale.createdAt)}</p>
       <p class="text-sm">فاتورة رقم: ${sale.id}</p>
     </div>
@@ -59,6 +71,7 @@ export const generateReceipt = (sale: Sale, businessName: string, receiptFooter:
     <div class="border-t border-b py-2 my-2">
       ${sale.customerName ? `<p class="text-sm">العميل: ${sale.customerName}</p>` : ''}
       ${sale.customerPhone ? `<p class="text-sm">رقم الهاتف: ${sale.customerPhone}</p>` : ''}
+      ${sale.isDebt ? `<p class="text-sm font-bold">نوع البيع: دين</p>` : ''}
     </div>
     
     <table class="w-full text-right text-sm">
@@ -92,8 +105,14 @@ export const generateReceipt = (sale: Sale, businessName: string, receiptFooter:
           <span>الخصم:</span>
           <span>${formatCurrency(sale.discount)}</span>
         </div>
+        ${sale.discountReason ? `
+          <div class="flex justify-between text-xs">
+            <span>سبب الخصم:</span>
+            <span>${sale.discountReason}</span>
+          </div>
+        ` : ''}
       ` : ''}
-      ${sale.tax > 0 ? `
+      ${applyTax && sale.tax > 0 ? `
         <div class="flex justify-between">
           <span>الضريبة (${sale.tax}%):</span>
           <span>${formatCurrency((sale.total - sale.discount) * sale.tax / 100)}</span>
@@ -105,12 +124,17 @@ export const generateReceipt = (sale: Sale, businessName: string, receiptFooter:
       </div>
       <div class="flex justify-between">
         <span>طريقة الدفع:</span>
-        <span>${sale.paymentMethod === 'cash' ? 'نقدي' : sale.paymentMethod === 'card' ? 'بطاقة' : 'أخرى'}</span>
+        <span>${sale.paymentMethod === 'cash' ? 'نقدي' : sale.paymentMethod === 'card' ? 'بطاقة' : 'دين'}</span>
       </div>
+      ${sale.notes ? `
+        <div class="mt-2 text-xs">
+          <p>ملاحظات: ${sale.notes}</p>
+        </div>
+      ` : ''}
     </div>
     
     <div class="text-center mt-4 text-sm">
-      <p>${receiptFooter || 'شكراً لزيارتكم'}</p>
+      <p>${footer}</p>
     </div>
   `;
   
@@ -186,7 +210,7 @@ export const exportDataToJson = (data: any): void => {
   
   const a = document.createElement('a');
   a.href = url;
-  a.download = `pos_backup_${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `nora_backup_${new Date().toISOString().slice(0, 10)}.json`;
   document.body.appendChild(a);
   a.click();
   
@@ -219,4 +243,46 @@ export const importDataFromJson = (file: File): Promise<any> => {
     
     reader.readAsText(file);
   });
+};
+
+// Track debts
+export const getDebtsForCustomer = (sales: Sale[], customerName: string): number => {
+  return sales
+    .filter(sale => sale.isDebt && sale.customerName === customerName)
+    .reduce((total, sale) => total + sale.finalTotal, 0);
+};
+
+// Check if customer has reached debt limit
+export const hasReachedDebtLimit = (
+  sales: Sale[], 
+  customerName: string, 
+  limit: number
+): boolean => {
+  const totalDebt = getDebtsForCustomer(sales, customerName);
+  return totalDebt >= limit;
+};
+
+// Calculate end-of-shift summary
+export const calculateShiftSummary = (sales: Sale[]) => {
+  const totalCashSales = sales
+    .filter(sale => sale.paymentMethod === 'cash')
+    .reduce((total, sale) => total + sale.finalTotal, 0);
+    
+  const totalCardSales = sales
+    .filter(sale => sale.paymentMethod === 'card')
+    .reduce((total, sale) => total + sale.finalTotal, 0);
+    
+  const totalDebtSales = sales
+    .filter(sale => sale.isDebt || sale.paymentMethod === 'other')
+    .reduce((total, sale) => total + sale.finalTotal, 0);
+    
+  const totalSales = totalCashSales + totalCardSales + totalDebtSales;
+  
+  return {
+    totalSales,
+    totalCashSales,
+    totalCardSales,
+    totalDebtSales,
+    salesCount: sales.length
+  };
 };

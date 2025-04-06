@@ -1,6 +1,6 @@
 
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster as Sonner } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import Settings from "./pages/Settings";
+import ShiftEnd from "./pages/ShiftEnd";
 import TabBar from "./components/TabBar";
 
 // التحقق مما إذا كانت أول زيارة للتطبيق
@@ -57,6 +58,7 @@ const App = () => {
               <Route path="/sales" element={<Sales />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/settings" element={<Settings />} />
+              <Route path="/shift-end" element={<ShiftEnd />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <TabBar />
