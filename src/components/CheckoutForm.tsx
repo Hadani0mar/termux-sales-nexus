@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from "react";
-import { CartItem, Sale } from "@/types";
+import { CartItem, Sale, SaleItem } from "@/types";
 import { formatCurrency, calculateCartTotal, calculateFinalTotal } from "@/utils/helpers";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -112,8 +111,14 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
       return;
     }
     
+    const saleItems: SaleItem[] = cartItems.map(item => ({
+      product: item.product,
+      quantity: item.quantity,
+      price: item.product.price
+    }));
+    
     const saleData: Omit<Sale, "id" | "createdAt"> = {
-      items: cartItems,
+      items: saleItems,
       total: subtotal,
       discount: formData.discount,
       tax: formData.tax,
@@ -132,7 +137,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({
   
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="sm:max-w-md" side="left">
+      <SheetContent className="sm:max-w-md overflow-y-auto max-h-screen" side="left">
         <SheetHeader>
           <SheetTitle>إتمام عملية البيع</SheetTitle>
         </SheetHeader>

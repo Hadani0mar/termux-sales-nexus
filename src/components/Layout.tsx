@@ -1,12 +1,19 @@
 
 import React, { ReactNode } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  return <div className="container mx-auto">{children}</div>;
+  const isMobile = useIsMobile();
+  
+  return (
+    <div className={`container mx-auto ${isMobile ? 'pt-16' : 'pt-20'}`}>
+      {children}
+    </div>
+  );
 };
 
 export default Layout;

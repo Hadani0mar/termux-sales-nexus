@@ -2,7 +2,7 @@
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "@/contexts/AppContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { useState, useEffect } from "react";
@@ -66,8 +66,8 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <div className="flex flex-col min-h-screen">
-              <TopBar /> {/* شريط التبويبات في الأعلى */}
-              <div className="flex-1 overflow-auto p-4">
+              <TopBar />
+              <div className="flex-1 overflow-auto p-2 md:p-4">
                 <Routes>
                   <Route path="/" element={<POS />} />
                   <Route path="/inventory" element={<Inventory />} />
