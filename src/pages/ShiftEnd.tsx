@@ -164,166 +164,164 @@ const ShiftEnd = () => {
   };
   
   return (
-    <Layout>
-      <div className="space-y-6">
-        <div className="glass rounded-xl p-4 mb-6">
-          <h1 className="text-2xl font-bold mb-4">جرد نهاية الدوام</h1>
-          <p className="text-muted-foreground">قم بإجراء تسوية الصندوق لنهاية الدوام وإنشاء تقرير</p>
-        </div>
+    <div className="space-y-6">
+      <div className="glass rounded-xl p-4 mb-6">
+        <h1 className="text-2xl font-bold mb-4">جرد نهاية الدوام</h1>
+        <p className="text-muted-foreground">قم بإجراء تسوية الصندوق لنهاية الدوام وإنشاء تقرير</p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardContent className="pt-6">
+            <CardTitle className="mb-4">ملخص المبيعات</CardTitle>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>عدد المبيعات:</span>
+                <span className="font-semibold">{summary.salesCount}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>إجمالي المبيعات:</span>
+                <span className="font-semibold">{formatCurrency(summary.totalSales)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>المبيعات النقدية:</span>
+                <span className="font-semibold">{formatCurrency(summary.totalCashSales)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>مبيعات البطاقات:</span>
+                <span className="font-semibold">{formatCurrency(summary.totalCardSales)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>مبيعات الدين:</span>
+                <span className="font-semibold">{formatCurrency(summary.totalDebtSales)}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t mt-2">
+                <span>ديون تم سدادها اليوم:</span>
+                <span className="font-semibold">
+                  {formatCurrency(todayPaidDebts.reduce((total, sale) => total + sale.finalTotal, 0))}
+                </span>
+              </div>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => setPaidDebtsDialogOpen(true)}
+                disabled={todayPaidDebts.length === 0}
+              >
+                تحديد الديون المسددة ({todayPaidDebts.length})
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card>
-            <CardContent className="pt-6">
-              <CardTitle className="mb-4">ملخص المبيعات</CardTitle>
+        <Card>
+          <CardContent className="pt-6">
+            <CardTitle className="mb-4">تسوية الصندوق</CardTitle>
+            <div className="space-y-4">
               <div className="space-y-2">
+                <Label htmlFor="cashInDrawer">النقد في الصندوق</Label>
+                <Input
+                  id="cashInDrawer"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={cashInDrawer}
+                  onChange={(e) => setCashInDrawer(parseFloat(e.target.value) || 0)}
+                  placeholder="أدخل المبلغ النقدي في الصندوق"
+                  className="text-left"
+                  dir="ltr"
+                />
+              </div>
+              
+              <div className="p-3 rounded-lg bg-muted space-y-2">
                 <div className="flex justify-between">
-                  <span>عدد المبيعات:</span>
-                  <span className="font-semibold">{summary.salesCount}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>إجمالي المبيعات:</span>
-                  <span className="font-semibold">{formatCurrency(summary.totalSales)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>المبيعات النقدية:</span>
+                  <span>المتوقع في الصندوق:</span>
                   <span className="font-semibold">{formatCurrency(summary.totalCashSales)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>مبيعات البطاقات:</span>
-                  <span className="font-semibold">{formatCurrency(summary.totalCardSales)}</span>
+                  <span>مصروفات المحل:</span>
+                  <span className="font-semibold text-red-500">{formatCurrency(totalExpenses)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>مبيعات الدين:</span>
-                  <span className="font-semibold">{formatCurrency(summary.totalDebtSales)}</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t mt-2">
-                  <span>ديون تم سدادها اليوم:</span>
-                  <span className="font-semibold">
-                    {formatCurrency(todayPaidDebts.reduce((total, sale) => total + sale.finalTotal, 0))}
+                <div className="flex justify-between pt-2 border-t mt-1">
+                  <span>الفرق:</span>
+                  <span className={`font-semibold ${cashShortage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    {cashShortage >= 0 ? 'فائض: ' : 'عجز: '}
+                    {formatCurrency(Math.abs(cashShortage))}
                   </span>
                 </div>
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
-                  onClick={() => setPaidDebtsDialogOpen(true)}
-                  disabled={todayPaidDebts.length === 0}
-                >
-                  تحديد الديون المسددة ({todayPaidDebts.length})
-                </Button>
               </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <CardTitle className="mb-4">تسوية الصندوق</CardTitle>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="cashInDrawer">النقد في الصندوق</Label>
-                  <Input
-                    id="cashInDrawer"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={cashInDrawer}
-                    onChange={(e) => setCashInDrawer(parseFloat(e.target.value) || 0)}
-                    placeholder="أدخل المبلغ النقدي في الصندوق"
-                    className="text-left"
-                    dir="ltr"
-                  />
-                </div>
-                
-                <div className="p-3 rounded-lg bg-muted space-y-2">
-                  <div className="flex justify-between">
-                    <span>المتوقع في الصندوق:</span>
-                    <span className="font-semibold">{formatCurrency(summary.totalCashSales)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>مصروفات المحل:</span>
-                    <span className="font-semibold text-red-500">{formatCurrency(totalExpenses)}</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t mt-1">
-                    <span>الفرق:</span>
-                    <span className={`font-semibold ${cashShortage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                      {cashShortage >= 0 ? 'فائض: ' : 'عجز: '}
-                      {formatCurrency(Math.abs(cashShortage))}
-                    </span>
-                  </div>
-                </div>
-                
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => setExpenseFormOpen(true)}
-                >
-                  سحب مصروفات من الصندوق
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardContent className="pt-6">
-              <CardTitle className="mb-4">مصروفات المحل</CardTitle>
               
-              {expenses.length > 0 ? (
-                <ScrollArea className="h-40 mb-4">
-                  <div className="space-y-2">
-                    {expenses.map(expense => (
-                      <div key={expense.id} className="p-2 border rounded-lg flex justify-between items-center">
-                        <div>
-                          <div className="font-semibold">{formatCurrency(expense.amount)}</div>
-                          <div className="text-xs text-muted-foreground">{expense.reason}</div>
-                        </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-7 w-7 p-0 text-destructive"
-                          onClick={() => handleDeleteExpense(expense.id)}
-                        >
-                          ×
-                        </Button>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => setExpenseFormOpen(true)}
+              >
+                سحب مصروفات من الصندوق
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <CardTitle className="mb-4">مصروفات المحل</CardTitle>
+            
+            {expenses.length > 0 ? (
+              <ScrollArea className="h-40 mb-4">
+                <div className="space-y-2">
+                  {expenses.map(expense => (
+                    <div key={expense.id} className="p-2 border rounded-lg flex justify-between items-center">
+                      <div>
+                        <div className="font-semibold">{formatCurrency(expense.amount)}</div>
+                        <div className="text-xs text-muted-foreground">{expense.reason}</div>
                       </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              ) : (
-                <div className="text-center py-4 text-muted-foreground">
-                  لا توجد مصروفات مسجلة
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-7 w-7 p-0 text-destructive"
+                        onClick={() => handleDeleteExpense(expense.id)}
+                      >
+                        ×
+                      </Button>
+                    </div>
+                  ))}
                 </div>
-              )}
-              
-              <div className="space-y-4 mt-4">
-                <div className="space-y-2">
-                  <Label htmlFor="notes">ملاحظات</Label>
-                  <Textarea
-                    id="notes"
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="أدخل أي ملاحظات إضافية..."
-                    rows={3}
-                  />
-                </div>
-                
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    className="flex-1"
-                    onClick={() => setResetAlertOpen(true)}
-                  >
-                    إعادة تعيين
-                  </Button>
-                  <Button 
-                    className="flex-1"
-                    onClick={() => setConfirmDialogOpen(true)}
-                  >
-                    إنهاء الدوام
-                  </Button>
-                </div>
+              </ScrollArea>
+            ) : (
+              <div className="text-center py-4 text-muted-foreground">
+                لا توجد مصروفات مسجلة
               </div>
-            </CardContent>
-          </Card>
-        </div>
+            )}
+            
+            <div className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="notes">ملاحظات</Label>
+                <Textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="أدخل أي ملاحظات إضافية..."
+                  rows={3}
+                />
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => setResetAlertOpen(true)}
+                >
+                  إعادة تعيين
+                </Button>
+                <Button 
+                  className="flex-1"
+                  onClick={() => setConfirmDialogOpen(true)}
+                >
+                  إنهاء الدوام
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
       {/* Confirmation Dialog */}
@@ -483,7 +481,7 @@ const ShiftEnd = () => {
         onAddExpense={handleAddExpense}
         currentCash={cashInDrawer}
       />
-    </Layout>
+    </div>
   );
 };
 

@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -7,6 +8,7 @@ export interface Product {
   barcode?: string;
   category: string;
   image?: string;
+  cost?: number;
   createdAt: Date;
   updatedAt: Date;
 }

@@ -189,15 +189,27 @@
 
 /* Fix for dark mode product cards */
 .dark .product-card {
-  @apply bg-gray-800 border-gray-700 text-white;
+  @apply bg-gray-800 border-gray-700 text-gray-100;
 }
 
 .dark .product-card .product-price {
   @apply text-green-400;
 }
 
+.dark .product-card .product-stock {
+  @apply text-gray-300;
+}
+
 .dark .product-card .product-name {
   @apply text-white;
+}
+
+.dark .product-card .product-category {
+  @apply text-gray-300;
+}
+
+.dark .product-card-actions button {
+  @apply bg-gray-700 text-white hover:bg-gray-600;
 }
 
 /* Fix for printing */
