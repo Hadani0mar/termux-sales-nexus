@@ -33,7 +33,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
     ? JSON.parse(savedSettings)
     : defaultSettings;
   
-  const categories = settings.categories.map(cat => cat.name);
+  // Make sure categories is never undefined by using empty array as fallback
+  const categories = settings.categories?.map(cat => cat.name) || [];
   
   const [formData, setFormData] = useState<Omit<Product, "id" | "createdAt" | "updatedAt">>({
     name: initialData?.name || "",
@@ -183,11 +184,15 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   <SelectValue placeholder="اختر فئة" />
                 </SelectTrigger>
                 <SelectContent>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
+                  {categories.length > 0 ? (
+                    categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="أخرى">أخرى</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </div>
