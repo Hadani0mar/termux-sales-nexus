@@ -185,17 +185,24 @@ const POS = () => {
                 >
                   الكل
                 </Badge>
-                {settings.categories.map((category) => (
-                  <Badge
-                    key={category.id}
-                    variant={selectedCategory === category.name ? "default" : "outline"}
-                    className="cursor-pointer"
-                    onClick={() => setSelectedCategory(category.name)}
-                    style={category.color ? { backgroundColor: selectedCategory === category.name ? category.color : 'transparent', borderColor: category.color, color: selectedCategory === category.name ? 'white' : category.color } : {}}
-                  >
-                    {category.name}
+                {/* Make sure categories array exists and has entries */}
+                {settings.categories && settings.categories.length > 0 ? (
+                  settings.categories.map((category) => (
+                    <Badge
+                      key={category.id}
+                      variant={selectedCategory === category.name ? "default" : "outline"}
+                      className="cursor-pointer"
+                      onClick={() => setSelectedCategory(category.name)}
+                      style={category.color ? { backgroundColor: selectedCategory === category.name ? category.color : 'transparent', borderColor: category.color, color: selectedCategory === category.name ? 'white' : category.color } : {}}
+                    >
+                      {category.name}
+                    </Badge>
+                  ))
+                ) : (
+                  <Badge variant="outline" className="cursor-pointer">
+                    أخرى
                   </Badge>
-                ))}
+                )}
               </div>
             </ScrollArea>
           </div>
