@@ -10,7 +10,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
   
   return (
-    <div className={`container mx-auto ${isMobile ? 'pt-16' : 'pt-20'}`}>
+    <div className={`container mx-auto ${isMobile ? 'pt-20' : 'pt-24'}`}>
       {children}
     </div>
   );

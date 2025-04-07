@@ -43,7 +43,7 @@ export const formatDate = (date: Date): string => {
   }).format(date);
 };
 
-// Export generateReceipt and generateShiftReport functions from printingHelpers
+// Re-export from printingHelpers.ts
 export { generateReceipt, generateShiftReport } from './printingHelpers';
 
 // Filter sales by date range

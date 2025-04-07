@@ -112,13 +112,19 @@ export const generateReceipt = (sale: Sale, businessName?: string, receiptFooter
         jsPDF: { unit: 'mm', format: [80, 150], orientation: 'portrait' }
       };
       
-      html2pdf().from(container).set(options).save().then(() => {
-        document.body.removeChild(container);
-        resolve();
-      }).catch(error => {
-        document.body.removeChild(container);
-        reject(error);
-      });
+      // Use html2pdf directly without then/catch
+      html2pdf()
+        .from(container)
+        .set(options)
+        .save()
+        .then(() => {
+          document.body.removeChild(container);
+          resolve();
+        })
+        .catch(error => {
+          document.body.removeChild(container);
+          reject(error);
+        });
     } catch (error) {
       reject(error);
     }
@@ -207,13 +213,19 @@ export const generateShiftReport = (report: ShiftReport): Promise<void> => {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
       
-      html2pdf().from(container).set(options).save().then(() => {
-        document.body.removeChild(container);
-        resolve();
-      }).catch(error => {
-        document.body.removeChild(container);
-        reject(error);
-      });
+      // Use html2pdf directly without then/catch
+      html2pdf()
+        .from(container)
+        .set(options)
+        .save()
+        .then(() => {
+          document.body.removeChild(container);
+          resolve();
+        })
+        .catch(error => {
+          document.body.removeChild(container);
+          reject(error);
+        });
     } catch (error) {
       reject(error);
     }

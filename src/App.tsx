@@ -22,27 +22,13 @@ const App = () => {
   
   // تحقق مما إذا كان ينبغي عرض صفحة الهبوط من التخزين المحلي
   useEffect(() => {
-    const landingShown = localStorage.getItem("landingShown");
-    // إذا لم يسبق عرض صفحة الهبوط، أو إذا كان التاريخ المخزن قديمًا، اعرض صفحة الهبوط
-    // سنتحقق إذا كان قد مر يوم كامل على آخر عرض للصفحة
-    if (!landingShown) {
-      setShowLanding(true);
-    } else {
-      const lastShown = new Date(landingShown);
-      const now = new Date();
-      // عرض صفحة الهبوط مرة كل يوم على الأقل
-      if (now.getDate() !== lastShown.getDate() || 
-          now.getMonth() !== lastShown.getMonth() ||
-          now.getFullYear() !== lastShown.getFullYear()) {
-        setShowLanding(true);
-      } else {
-        setShowLanding(false);
-      }
-    }
+    // Always show landing page when the app starts
+    const now = new Date();
+    // Store the current timestamp to localStorage
+    localStorage.setItem("landingShown", now.toISOString());
   }, []);
 
   const handleLandingComplete = () => {
-    localStorage.setItem("landingShown", new Date().toISOString());
     setShowLanding(false);
   };
 
@@ -65,7 +51,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            <div className="flex flex-col min-h-screen">
+            <div className="flex flex-col min-h-screen relative">
               <TopBar />
               <div className="flex-1 overflow-auto p-2 md:p-4">
                 <Routes>

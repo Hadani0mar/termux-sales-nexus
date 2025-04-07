@@ -1,13 +1,8 @@
-
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { useAppContext } from "@/contexts/AppContext";
-import { 
-  formatCurrency, 
-  formatDate, 
-  generateReceipt, 
-  filterSalesByDateRange 
-} from "@/utils/helpers";
+import { formatCurrency, formatDate } from "@/utils/helpers";
+import { generateReceipt } from "@/utils/printingHelpers";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { 
@@ -42,6 +37,14 @@ const Sales = () => {
   const [fromDate, setFromDate] = useState<Date | undefined>(undefined);
   const [toDate, setToDate] = useState<Date | undefined>(undefined);
   
+  // Filter sales by date range
+  const filterSalesByDateRange = (sales: Sale[], startDate: Date, endDate: Date): Sale[] => {
+    return sales.filter((sale) => {
+      const saleDate = new Date(sale.createdAt);
+      return saleDate >= startDate && saleDate <= endDate;
+    });
+  };
+  
   // فلترة المبيعات
   let filteredSales = [...state.sales];
   
@@ -62,7 +65,9 @@ const Sales = () => {
   
   // إعادة طباعة الفاتورة
   const handlePrintReceipt = (sale: Sale) => {
-    generateReceipt(sale, "نظام المبيعات");
+    generateReceipt(sale, "نظام المبيعات")
+      .then(() => console.log("Receipt generated successfully"))
+      .catch(error => console.error("Error generating receipt:", error));
   };
   
   // إعادة تعيين الفلاتر
@@ -155,8 +160,8 @@ const Sales = () => {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-4 border-b">
+        <div className="bg-card rounded-lg shadow dark:bg-gray-800">
+          <div className="p-4 border-b dark:border-gray-700">
             <h2 className="text-lg font-semibold">
               سجل المبيعات ({filteredSales.length})
             </h2>

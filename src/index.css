@@ -89,12 +89,14 @@
 .receipt-container {
   max-width: 80mm;
   margin: 0 auto;
+  background-color: white;
+  color: black;
 }
 
 /* POS Styles */
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
   gap: 0.5rem;
 }
 
@@ -186,11 +188,11 @@
 }
 
 .dark .top-tab-bar {
-  @apply bg-gray-900/90 border-gray-700/70 backdrop-blur-md;
+  @apply bg-gray-900/95 border-gray-700/70 backdrop-blur-md;
 }
 
 .light .top-tab-bar {
-  @apply bg-white/90 border-gray-200/70 backdrop-blur-md;
+  @apply bg-white/95 border-gray-200/70 backdrop-blur-md;
 }
 
 /* Fix for dark mode product cards */
@@ -225,6 +227,8 @@
   }
   .receipt-container, .receipt-container * {
     visibility: visible;
+    color: black;
+    background-color: white;
   }
   .receipt-container {
     position: absolute;
@@ -257,14 +261,15 @@
   animation-delay: 400ms;
 }
 
-/* Screen size for small mobile */
-@layer utilities {
-  @variants responsive {
-    .xs\:block {
-      display: block;
-    }
-    .xs\:hidden {
-      display: none;
-    }
+/* Mobile optimization */
+@media (max-width: 640px) {
+  .top-tab-bar {
+    @apply pb-1 pt-2;
+  }
+  
+  .top-tab-bar a {
+    @apply text-center p-0;
   }
 }
+
+/* Ensure vite.config.ts includes html2pdf.js in optimizeDeps */

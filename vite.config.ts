@@ -22,5 +22,23 @@ export default defineConfig(({ mode }) => ({
   },
   optimizeDeps: {
     include: ['html2pdf.js'] // Ensure html2pdf is pre-bundled
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-select',
+            '@radix-ui/react-toast',
+            'lucide-react'
+          ],
+          pdf: ['html2pdf.js']
+        }
+      }
+    }
   }
 }));
