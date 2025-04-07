@@ -178,13 +178,42 @@
   animation: pulse 2s infinite;
 }
 
-/* Bottom tab bar */
-.bottom-tab-bar {
-  @apply fixed bottom-0 left-0 right-0 bg-background border-t border-border flex justify-around z-50 py-2 px-4;
+/* Top tab bar */
+.top-tab-bar {
+  @apply sticky top-0 bg-background border-b border-border z-50 py-2 px-4;
 }
 
-.dark .bottom-tab-bar {
+.dark .top-tab-bar {
   @apply bg-gray-900 border-gray-700;
+}
+
+/* Fix for dark mode product cards */
+.dark .product-card {
+  @apply bg-gray-800 border-gray-700 text-white;
+}
+
+.dark .product-card .product-price {
+  @apply text-green-400;
+}
+
+.dark .product-card .product-name {
+  @apply text-white;
+}
+
+/* Fix for printing */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .receipt-container, .receipt-container * {
+    visibility: visible;
+  }
+  .receipt-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
 }
 
 /* Landing page */

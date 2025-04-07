@@ -1,12 +1,11 @@
-
 export interface Product {
   id: string;
   name: string;
+  description?: string;
   price: number;
   stock: number;
-  category: string;
   barcode?: string;
-  cost?: number;
+  category: string;
   image?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -17,22 +16,29 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface SaleItem {
+  product: Product;
+  quantity: number;
+  price: number;
+}
+
 export interface Sale {
   id: string;
-  items: CartItem[];
+  items: SaleItem[];
   total: number;
-  discount: number;
   tax: number;
+  discount: number;
   finalTotal: number;
-  paymentMethod: "cash" | "card" | "other";
+  paymentMethod: "cash" | "card" | "debt" | "other";
+  isDebt: boolean;
+  isFrozen?: boolean;
+  debtorName?: string;
   customerName?: string;
   customerPhone?: string;
-  notes?: string;
   discountReason?: string;
-  isDebt?: boolean;
-  debtorName?: string;
-  isFrozen?: boolean; // Track frozen debt status
+  notes?: string;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 export interface AppState {
@@ -41,13 +47,18 @@ export interface AppState {
   sales: Sale[];
 }
 
-export interface Category {
-  id: string;
-  name: string;
-  color?: string;
+export interface Settings {
+  businessName: string;
+  location?: string;
+  receiptFooter?: string;
+  shouldApplyTax: boolean;
+  taxRate: number;
+  authorizedDebtors: { name: string; limit: number; id: string }[];
+  categories: { name: string; color?: string; id: string }[];
+  printDiscountReasons?: boolean;
+  printNotes?: boolean;
 }
 
-// New interface for shift reports
 export interface ShiftReport {
   id: string;
   date: Date;
@@ -58,15 +69,14 @@ export interface ShiftReport {
   totalDebtSales: number;
   cashInDrawer: number;
   cashShortage: number;
+  expenses?: number;
+  paidDebts?: Sale[];
   notes?: string;
-  includeDebtInTotal: boolean;
 }
 
-// New interface for debtor
-export interface Debtor {
-  name: string;
-  phone?: string;
-  limit: number;
-  notes?: string;
-  currentDebt: number;
+export interface Expense {
+  id: string;
+  amount: number;
+  reason: string;
+  date: Date;
 }

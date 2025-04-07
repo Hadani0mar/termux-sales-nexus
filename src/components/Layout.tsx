@@ -2,6 +2,7 @@
 import React from "react";
 import { useLocation } from "react-router-dom";
 import { useTheme } from "@/contexts/ThemeContext";
+import TopBar from "./TopBar";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -39,13 +40,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                location.pathname === "/inventory" ? "المخزون" :
                location.pathname === "/sales" ? "المبيعات" :
                location.pathname === "/dashboard" ? "الإحصائيات" :
-               location.pathname === "/settings" ? "الإعدادات" : "الصفحة الرئيسية"}
+               location.pathname === "/settings" ? "الإعدادات" :
+               location.pathname === "/shift-end" ? "الجرد اليومي" : "الصفحة الرئيسية"}
             </h1>
           </div>
         </header>
         
+        {/* شريط التبويبات العلوي */}
+        <TopBar />
+        
         {/* محتوى الصفحة */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-20">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
           {children}
         </main>
       </div>

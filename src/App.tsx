@@ -14,20 +14,10 @@ import NotFound from "./pages/NotFound";
 import Landing from "./pages/Landing";
 import Settings from "./pages/Settings";
 import ShiftEnd from "./pages/ShiftEnd";
-import TabBar from "./components/TabBar";
-
-// التحقق مما إذا كانت أول زيارة للتطبيق
-const isFirstVisit = () => {
-  const visited = localStorage.getItem("visited");
-  if (!visited) {
-    localStorage.setItem("visited", "true");
-    return true;
-  }
-  return false;
-};
+import ShiftReports from "./pages/ShiftReports";
 
 const App = () => {
-  const [showLanding, setShowLanding] = useState(() => isFirstVisit());
+  const [showLanding, setShowLanding] = useState(true);
 
   const handleLandingComplete = () => {
     setShowLanding(false);
@@ -59,9 +49,9 @@ const App = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/shift-end" element={<ShiftEnd />} />
+              <Route path="/shift-reports" element={<ShiftReports />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
-            <TabBar />
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>

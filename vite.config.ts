@@ -20,4 +20,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    include: ['html2pdf.js'] // Ensure html2pdf is pre-bundled
+  }
 }));
